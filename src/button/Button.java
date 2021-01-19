@@ -20,17 +20,19 @@ public class Button extends Rectangle{
 	private int textWidth;
 	private int textHeight;
 	
-	public Button(int x, int y, int width, int height) {
+	public Button(int x, int y, int width, int height, String text) {
 		
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.text = "";
+		this.text = text;
 		this.font = new Font("Dialogue", Font.PLAIN, 12);	//default font for java swing
 		this.color = Color.black;
 		
 		setBounds(x, y, width, height);
+		
+		this.textWidth = calculateTextWidth();
 		
 	}
 	
@@ -63,27 +65,50 @@ public class Button extends Rectangle{
 		this.textWidth = calculateTextWidth();
 	}
 	
-	public void isPressed(int x, int y) {
-		
-		if(this.contains(new Point(x, y))) {
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	public void setY(int y) {
+		this.y = y;
+	}
+	
+	public double getY() {
+		return this.y;
+	}
+	
+	public double getX() {
+		return this.x;
+	}
+	
+	public void pressed(MouseEvent m) {
+		Rectangle r = new Rectangle(x, y, width, height);
+		if(r.contains(new Point(m.getX(), m.getY()))) {
 			pressed = true;
 		}
-		
+	}
+	
+	public boolean isPressed(MouseEvent m) {
+		Rectangle r = new Rectangle(x, y, width, height);
+		if(r.contains(new Point(m.getX(), m.getY()))) {
+			return true;
+		}
+		return false;
 	}
 	
 	public void released() {
 		pressed = false;
 	}
 	
-	public boolean isClicked(int x, int y) {
-		
-		if(this.contains(new Point(x, y))) {
-			return true;
-		}
-		
-		return false;
-		
-	}
+//	public boolean isClicked(int x, int y) {
+//		
+//		if(this.contains(new Point(x, y))) {
+//			return true;
+//		}
+//		
+//		return false;
+//		
+//	}
 	
 	public boolean isClicked(MouseEvent arg0) {
 		

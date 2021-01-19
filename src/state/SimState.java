@@ -9,13 +9,18 @@ import java.util.ArrayList;
 
 import util.Simulator;
 import button.Button;
+import button.ButtonManager;
+import button.SliderButton;
+import main.MainPanel;
 
 public class SimState extends State{
 	
-	public int graphWidth = 800;
+	public int graphWidth = 600;
 	public int graphHeight = 400;
 	
 	ArrayList<Button> buttons;
+	
+	ButtonManager bm;
 	
 	ArrayDeque<Double> susceptibleGraph;
 	ArrayDeque<Double> infectedGraph;
@@ -30,15 +35,19 @@ public class SimState extends State{
 		infectedGraph = new ArrayDeque<Double>();
 		immuneGraph = new ArrayDeque<Double>();
 		buttons = new ArrayList<Button>();
+		bm = new ButtonManager();
 		
-		for(int i = 0; i < 800; i++) {
+		for(int i = 0; i < graphWidth; i++) {
 			susceptibleGraph.add((double) 1);
 			infectedGraph.add((double) 0);
 			immuneGraph.add((double) 0);
 		}
 		
-		buttons.add(new Button(50, 50, 100, 50));
-		buttons.get(0).setText("Infect");
+		bm.addButton(new Button(50, 50, 100, 50, "Infect"));
+		
+		bm.addSliderButton(new SliderButton(200, 50, 200, 10, 0, 100, "r0"));
+		
+		bm.sliderButtons.get(0).setVal(25);
 		
 	}
 
@@ -51,7 +60,9 @@ public class SimState extends State{
 	@Override
 	public void tick(Point mouse) {
 		
+		bm.tick(mouse);
 		
+		sim.rBase = (double) bm.sliderButtons.get(0).getVal() * 0.1;
 		
 		for(int i = 0; i < 2; i++) {
 			sim.tick();
@@ -82,9 +93,7 @@ public class SimState extends State{
 	@Override
 	public void draw(Graphics g) {
 		
-		for(Button b : buttons) {
-			b.draw(g);
-		}
+		bm.draw(g);
 		
 		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
 		Double[] printInfected = infectedGraph.toArray(new Double[0]);
@@ -97,13 +106,13 @@ public class SimState extends State{
 			int immuneHeight = (int) (graphHeight * printImmune[i]);
 			
 			g.setColor(Color.RED);
-			g.drawRect(i, graphHeight - infectedHeight + 100, 1, infectedHeight);
+			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight + 100, 1, infectedHeight);
 			
 			g.setColor(Color.blue);
-			g.drawRect(i, graphHeight - infectedHeight - immuneHeight + 100, 1, immuneHeight);
+			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight - immuneHeight + 100, 1, immuneHeight);
 			
 			g.setColor(Color.lightGray);
-			g.drawRect(i, graphHeight - infectedHeight - immuneHeight - susceptibleHeight+ 100, 1, susceptibleHeight);
+			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight - immuneHeight - susceptibleHeight+ 100, 1, susceptibleHeight);
 			
 		}
 		
@@ -130,7 +139,7 @@ public class SimState extends State{
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		
-		if(buttons.get(0).isClicked(arg0)) {
+		if(bm.buttons.get(0).isClicked(arg0)) {
 			sim.infect(10000);
 		}
 		
@@ -151,18 +160,14 @@ public class SimState extends State{
 	@Override
 	public void mousePressed(MouseEvent arg0) {
 
-		for(Button b : buttons) {
-			b.isPressed(arg0.getX(), arg0.getY());
-		}
+		bm.mousePressed(arg0);
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		
-		for(Button b : buttons) {
-			b.released();
-		}
+		bm.mouseReleased();
 		
 	}
 
