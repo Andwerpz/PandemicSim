@@ -46,12 +46,13 @@ public class SimState extends State{
 			deadGraph.add((double) 0);
 		}
 		
-		bm.addButton(new Button(50, 50, 100, 50, "Reset"));
+		bm.addButton(new Button(25, 25, 70, 25, "Reset"));
+		bm.addButton(new Button(25, 55, 70, 25, "Vaccinate"));
 		
-		bm.addSliderButton(new SliderButton(200, 50, 200, 10, 0, 100, "r0"));
-		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 0, 100, "Mortality Rate"));
-		bm.addSliderButton(new SliderButton(200, 150, 200, 10, 1, 180, "Time Infected"));
-		bm.addSliderButton(new SliderButton(200, 200, 400, 10, 1, 720, "Time Immune"));
+		bm.addSliderButton(new SliderButton(200, 20, 200, 10, 0, 100, "r0"));
+		bm.addSliderButton(new SliderButton(200, 60, 200, 10, 0, 100, "Mortality Rate"));
+		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 1, 180, "Time Infected"));
+		bm.addSliderButton(new SliderButton(200, 140, 400, 10, 1, 720, "Time Immune"));
 		
 		bm.sliderButtons.get(0).setVal(25);
 		bm.sliderButtons.get(1).setVal(0);
@@ -173,7 +174,7 @@ public class SimState extends State{
 		
 		if(buttonClicked.equals("Reset")) {
 			
-			System.out.println("hey");
+			//System.out.println("hey");
 			
 			for(int i = 0; i < graphWidth; i++) {
 				
@@ -191,6 +192,10 @@ public class SimState extends State{
 			sim.setInfected(20);
 			sim.setImmune(0);
 			sim.setDead(0);
+		}
+		
+		if(buttonClicked.equals("Vaccinate")) {
+			sim.vaccinate();
 		}
 		
 	}

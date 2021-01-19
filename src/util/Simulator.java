@@ -15,6 +15,8 @@ public class Simulator {
 	public int timeImmune = 365;
 	public double mortalityRate = 0.12;
 	
+	private boolean vaccinate;
+	
 	public Simulator() {
 		
 		infected = 20;
@@ -54,6 +56,10 @@ public class Simulator {
 	
 	public void setDead(int n) {
 		dead = n;
+	}
+	
+	public void vaccinate() {
+		
 	}
 	
 	public void tick() {
