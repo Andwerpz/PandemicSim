@@ -81,6 +81,10 @@ public class Button extends Rectangle{
 		return this.x;
 	}
 	
+	public String getText() {
+		return text;
+	}
+	
 	public void pressed(MouseEvent m) {
 		Rectangle r = new Rectangle(x, y, width, height);
 		if(r.contains(new Point(m.getX(), m.getY()))) {

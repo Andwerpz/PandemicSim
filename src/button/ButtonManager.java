@@ -73,15 +73,15 @@ public class ButtonManager {
 		
 	}
 	
-	public int buttonClicked(MouseEvent arg0) {
+	public String buttonClicked(MouseEvent arg0) {
 		
 		for(int i = 0; i < buttons.size(); i++) {
 			if(buttons.get(i).isClicked(arg0)) {
-				return i;
+				return buttons.get(i).getText();
 			}
 		}
 		
-		return -1;
+		return null;
 		
 	}
 	

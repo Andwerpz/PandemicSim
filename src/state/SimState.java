@@ -15,7 +15,7 @@ import main.MainPanel;
 
 public class SimState extends State{
 	
-	public int graphWidth = 600;
+	public int graphWidth = MainPanel.WIDTH / 2 + 5;
 	public int graphHeight = 400;
 	
 	ArrayList<Button> buttons;
@@ -25,6 +25,7 @@ public class SimState extends State{
 	ArrayDeque<Double> susceptibleGraph;
 	ArrayDeque<Double> infectedGraph;
 	ArrayDeque<Double> immuneGraph;
+	ArrayDeque<Double> deadGraph;
 	
 	Simulator sim;
 
@@ -34,6 +35,7 @@ public class SimState extends State{
 		susceptibleGraph = new ArrayDeque<Double>();
 		infectedGraph = new ArrayDeque<Double>();
 		immuneGraph = new ArrayDeque<Double>();
+		deadGraph = new ArrayDeque<Double>();
 		buttons = new ArrayList<Button>();
 		bm = new ButtonManager();
 		
@@ -41,13 +43,20 @@ public class SimState extends State{
 			susceptibleGraph.add((double) 1);
 			infectedGraph.add((double) 0);
 			immuneGraph.add((double) 0);
+			deadGraph.add((double) 0);
 		}
 		
-		bm.addButton(new Button(50, 50, 100, 50, "Infect"));
+		bm.addButton(new Button(50, 50, 100, 50, "Reset"));
 		
 		bm.addSliderButton(new SliderButton(200, 50, 200, 10, 0, 100, "r0"));
+		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 0, 100, "Mortality Rate"));
+		bm.addSliderButton(new SliderButton(200, 150, 200, 10, 1, 180, "Time Infected"));
+		bm.addSliderButton(new SliderButton(200, 200, 400, 10, 1, 720, "Time Immune"));
 		
 		bm.sliderButtons.get(0).setVal(25);
+		bm.sliderButtons.get(1).setVal(0);
+		bm.sliderButtons.get(2).setVal(14);
+		bm.sliderButtons.get(3).setVal(365);
 		
 	}
 
@@ -62,7 +71,12 @@ public class SimState extends State{
 		
 		bm.tick(mouse);
 		
-		sim.rBase = (double) bm.sliderButtons.get(0).getVal() * 0.1;
+		sim.setrBase((double) bm.sliderButtons.get(0).getVal() * 0.1);
+		sim.setMortalityRate((double) bm.sliderButtons.get(1).getVal() * 0.01);
+		sim.setTimeInfected(bm.sliderButtons.get(2).getVal());
+		sim.setTimeImmune(bm.sliderButtons.get(3).getVal());
+		
+		System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
 		
 		for(int i = 0; i < 2; i++) {
 			sim.tick();
@@ -71,23 +85,27 @@ public class SimState extends State{
 		susceptibleGraph.pop();
 		infectedGraph.pop();
 		immuneGraph.pop();
+		deadGraph.pop();
 		
 		int totalPeople = sim.totalPeople;
 		
 		int infected = sim.infected;
 		int immune = sim.immune;
 		int susceptible = sim.susceptible;
+		int dead = sim.dead;
 		
-		double[] temp = new double[3];
+		double[] temp = new double[4];
 		
 		temp[0] = (double)susceptible / totalPeople;
 		temp[1] = (double)infected / totalPeople;
 		temp[2] = (double)immune / totalPeople;
+		temp[3] = (double)dead / totalPeople;
+		
 		
 		susceptibleGraph.add(temp[0]);
 		infectedGraph.add(temp[1]);
 		immuneGraph.add(temp[2]);
-		
+		deadGraph.add(temp[3]);
 	}
 
 	@Override
@@ -95,27 +113,39 @@ public class SimState extends State{
 		
 		bm.draw(g);
 		
+		
+		
 		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
 		Double[] printInfected = infectedGraph.toArray(new Double[0]);
 		Double[] printImmune = immuneGraph.toArray(new Double[0]);
+		Double[] printDead = deadGraph.toArray(new Double[0]);
 		
 		for(int i = 0; i < susceptibleGraph.size(); i++) {
 		
 			int infectedHeight = (int) (graphHeight * printInfected[i]);
 			int susceptibleHeight = (int) (graphHeight * printSusceptible[i]);
 			int immuneHeight = (int) (graphHeight * printImmune[i]);
+			int deadHeight = (int) (graphHeight * printDead[i]);
 			
 			g.setColor(Color.RED);
-			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight + 100, 1, infectedHeight);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight, 3, infectedHeight);
 			
 			g.setColor(Color.blue);
-			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight - immuneHeight + 100, 1, immuneHeight);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight, 3, immuneHeight);
 			
-			g.setColor(Color.lightGray);
-			g.drawRect(i + MainPanel.WIDTH - graphWidth, graphHeight - infectedHeight - immuneHeight - susceptibleHeight+ 100, 1, susceptibleHeight);
+			g.setColor(Color.white);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight - susceptibleHeight, 3, susceptibleHeight);
+			
+			g.setColor(Color.darkGray);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight - susceptibleHeight - deadHeight, 3, deadHeight);
 			
 		}
 		
+		int herdImmunity = (int) ((graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
+		
+		System.out.println(MainPanel.HEIGHT - herdImmunity);
+		
+		g.drawLine(0, MainPanel.HEIGHT - herdImmunity, MainPanel.WIDTH, MainPanel.HEIGHT - herdImmunity);
 	}
 
 	@Override
@@ -139,8 +169,28 @@ public class SimState extends State{
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		
-		if(bm.buttons.get(0).isClicked(arg0)) {
-			sim.infect(10000);
+		String buttonClicked = bm.buttonClicked(arg0);
+		
+		if(buttonClicked.equals("Reset")) {
+			
+			System.out.println("hey");
+			
+			for(int i = 0; i < graphWidth; i++) {
+				
+				susceptibleGraph.pop();
+				infectedGraph.pop();
+				immuneGraph.pop();
+				deadGraph.pop();
+				
+				susceptibleGraph.add((double) 1);
+				infectedGraph.add((double) 0);
+				immuneGraph.add((double) 0);
+				deadGraph.add((double) 0);
+			}
+			sim.setSusceptible(sim.totalPeople - 20);
+			sim.setInfected(20);
+			sim.setImmune(0);
+			sim.setDead(0);
 		}
 		
 	}
