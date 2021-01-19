@@ -65,8 +65,16 @@ public class Simulator {
 	public void tick() {
 		
 		double infectChance = rBase / (double) timeInfected;
-		int numInfected = (int) ((infected * infectChance) * ((double)susceptible / totalPeople));
-		//System.out.println(infectChance);
+		int numInfected = (int) ((infected * infectChance) * ((double)susceptible / (totalPeople - dead)));
+		
+		double recoverChance = (double)1 / timeInfected;
+		int numRecovered = (int) ((infected * recoverChance));
+		
+		double mortalityChance = (1 / (double)timeInfected) * mortalityRate;
+		int numDead = (int) (infected * mortalityChance);
+		
+		double susceptibleChance = (double)1 / timeImmune;
+		int numSusceptible = (int) ((immune * susceptibleChance));
 		
 		infected += numInfected;
 		susceptible -= numInfected;
@@ -76,14 +84,10 @@ public class Simulator {
 			susceptible = 0;
 		}
 		
-		double recoverChance = (double)1 / timeInfected;
-		int numRecovered = (int) ((infected * recoverChance));
-		
 		immune += numRecovered;
 		infected -= numRecovered;
 		
-		double mortalityChance = (1 / (double)timeInfected) * mortalityRate;
-		int numDead = (int) (infected * mortalityChance);
+		
 		
 		dead += numDead;
 		infected -= numDead;
@@ -91,8 +95,7 @@ public class Simulator {
 		//System.out.println(infected + " " + susceptible);
 		
 		
-		double susceptibleChance = (double)1 / timeImmune;
-		int numSusceptible = (int) ((immune * susceptibleChance));
+		
 		
 		susceptible += numSusceptible;
 		immune -= numSusceptible;

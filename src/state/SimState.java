@@ -142,11 +142,20 @@ public class SimState extends State{
 			
 		}
 		
-		int herdImmunity = (int) ((graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
+		int herdImmunity = (int) (((double)graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
 		
 		System.out.println(MainPanel.HEIGHT - herdImmunity);
 		
 		g.drawLine(0, MainPanel.HEIGHT - herdImmunity, MainPanel.WIDTH, MainPanel.HEIGHT - herdImmunity);
+		
+		g.drawString("Susceptible: " + sim.susceptible, 700, 50);
+		g.drawString("Infected: " + sim.infected + "", 700, 75);
+		g.drawString("Immune: " + sim.immune + "", 700, 100);
+		g.drawString("Dead: " + sim.dead + "", 700, 125);
+		g.drawString("Total: " + (sim.susceptible + sim.infected + sim.immune + sim.dead), 700, 150);
+		g.drawString("Percentage Immune or Infected: " + ((sim.infected + sim.immune) / (double) (sim.totalPeople - sim.dead)), 700, 175);
+		g.drawString("Estimated Herd Immunity Level " + (1 - 1 / sim.rBase), 700, 200);
+		
 	}
 
 	@Override
