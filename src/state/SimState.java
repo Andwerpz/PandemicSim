@@ -60,20 +60,24 @@ public class SimState extends State{
 			dateGraph.add(0);
 		}
 		
-		bm.addButton(new Button(25, 25, 70, 25, "Reset"));
-		bm.addButton(new Button(25, 55, 70, 25, "Vaccinate"));
+		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
+		bm.addButton(new Button(1125, 55, 70, 25, "Vaccinate"));
 		
-		bm.addSliderButton(new SliderButton(200, 20, 200, 10, 0, 100, "r0"));
-		bm.addSliderButton(new SliderButton(200, 60, 200, 10, 0, 100, "Mortality Rate"));
-		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 1, 50, "Incubation Time"));
-		bm.addSliderButton(new SliderButton(200, 140, 200, 10, 1, 180, "Time Infected"));
-		bm.addSliderButton(new SliderButton(200, 180, 400, 10, 1, 720, "Time Immune"));
+		bm.addSliderButton(new SliderButton(250, 20, 200, 10, 0, 100, "r0"));
+		bm.addSliderButton(new SliderButton(250, 60, 200, 10, 0, 100, "Mortality Rate"));
+		bm.addSliderButton(new SliderButton(250, 100, 200, 10, 1, 50, "Incubation Time"));
+		bm.addSliderButton(new SliderButton(250, 140, 200, 10, 1, 180, "Time Infected"));
+		bm.addSliderButton(new SliderButton(250, 180, 400, 10, 1, 720, "Time Immune")); 
 		
-		bm.sliderButtons.get(0).setVal(25);
-		bm.sliderButtons.get(1).setVal(0);
-		bm.sliderButtons.get(2).setVal(3);
-		bm.sliderButtons.get(3).setVal(10);
-		bm.sliderButtons.get(4).setVal(365);
+		bm.addSliderButton(new SliderButton(25, 20, 200, 10, 0, 100, "Max Summer Effectiveness"));
+		
+		bm.sliderButtons.get(0).setVal(25);	//base r0
+		bm.sliderButtons.get(1).setVal(0);	//mortality rate
+		bm.sliderButtons.get(2).setVal(3);	//in days
+		bm.sliderButtons.get(3).setVal(10);	//in days
+		bm.sliderButtons.get(4).setVal(365);//in days
+		
+		bm.sliderButtons.get(5).setVal(31);//31% max summer reduction to r0
 		
 	}
 
@@ -94,9 +98,11 @@ public class SimState extends State{
 		sim.setTimeInfected(bm.sliderButtons.get(3).getVal());
 		sim.setTimeImmune(bm.sliderButtons.get(4).getVal());
 		
+		sim.setMaxSummerMultiplier((double) bm.sliderButtons.get(5).getVal());
+		
 		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
 		
-		for(int i = 0; i < 2; i++) {
+		for(int i = 0; i < 4; i++) {
 			sim.tick();
 		}
 		
@@ -207,11 +213,13 @@ public class SimState extends State{
 		g.drawString("Immune: " + sim.immune + "", 700, 100);
 		g.drawString("Dead: " + sim.dead + "", 700, 125);
 		g.drawString("Total: " + (sim.susceptible + sim.infected + sim.immune + sim.dead + sim.exposed), 700, 150);
-		g.drawString("Percentage Immune or Infected: " + ((sim.infected + sim.immune + sim.exposed) / (double) (sim.totalPeople - sim.dead)), 700, 175);
+		g.drawString("Percentage Immune, Exposed, or Infected: " + ((sim.infected + sim.immune + sim.exposed) / (double) (sim.totalPeople - sim.dead)), 700, 175);
 		g.drawString("Estimated Herd Immunity Level " + (1 - 1 / sim.rBase), 700, 200);
 		g.drawString("Actual Reproduction Value: " + rReal, 700, 225);
 		
 		g.drawString(sim.getTimeElapsed(), 1100, 260);
+		
+		g.fillRect(50, 300, (int) sim.summerMultiplier, 10);
 		
 	}
 

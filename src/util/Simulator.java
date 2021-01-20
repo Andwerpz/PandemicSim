@@ -28,6 +28,8 @@ public class Simulator {
 	
 	private double handWashingMultiplier = 0;
 	private double socialDistancingMultiplier = 0;
+	public double summerMultiplier = 0;
+	private double maxSummerMultiplier = 0;
 	
 	public Simulator() {
 		
@@ -65,6 +67,10 @@ public class Simulator {
 	
 	public void setIncubationTime(int n) {
 		incubationTime = n;
+	}
+	
+	public void setMaxSummerMultiplier(double n) {
+		maxSummerMultiplier = n;
 	}
 	
 	public void setInfected(int n) {
@@ -143,9 +149,18 @@ public class Simulator {
 			months = 0;
 		}
 		
+		int dayInYear = days + months * 30;
+		
+		summerMultiplier = (Math.sin(((2 * Math.PI) * ((double) dayInYear + 250)) / 365) * maxSummerMultiplier + maxSummerMultiplier) / 2 / 100;	//go onto desmos to test this function
+		
+		//+ 250 is offset to set the peak of summer in may or july
+		//31% is peak summer reduction in r0 in New York
+		
+		//System.out.println(summerMultiplier);
+		
 		herdImmunityPercentage = 1 - (1 / rBase);
 		
-		this.rReal = rBase * ((double) susceptible / (totalPeople - dead)) * (1 - handWashingMultiplier) * (1 - socialDistancingMultiplier);
+		this.rReal = rBase * ((double) susceptible / (totalPeople - dead)) * (1 - handWashingMultiplier) * (1 - socialDistancingMultiplier) * (1 - summerMultiplier);
 		
 		double exposeChance = rReal / (double) timeInfected;
 		//int numExposed = (int) ((infected * exposeChance) * ((double) susceptible / (totalPeople - dead)));
