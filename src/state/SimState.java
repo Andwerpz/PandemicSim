@@ -23,9 +23,12 @@ public class SimState extends State{
 	ButtonManager bm;
 	
 	ArrayDeque<Double> susceptibleGraph;
+	ArrayDeque<Double> exposedGraph;
 	ArrayDeque<Double> infectedGraph;
 	ArrayDeque<Double> immuneGraph;
 	ArrayDeque<Double> deadGraph;
+	
+	ArrayDeque<Integer> dateGraph;
 	
 	Simulator sim;
 
@@ -33,6 +36,7 @@ public class SimState extends State{
 		super(gsm);
 		sim = new Simulator();
 		susceptibleGraph = new ArrayDeque<Double>();
+		exposedGraph = new ArrayDeque<Double>();
 		infectedGraph = new ArrayDeque<Double>();
 		immuneGraph = new ArrayDeque<Double>();
 		deadGraph = new ArrayDeque<Double>();
@@ -41,6 +45,7 @@ public class SimState extends State{
 		
 		for(int i = 0; i < graphWidth; i++) {
 			susceptibleGraph.add((double) 1);
+			exposedGraph.add((double) 0);
 			infectedGraph.add((double) 0);
 			immuneGraph.add((double) 0);
 			deadGraph.add((double) 0);
@@ -56,7 +61,7 @@ public class SimState extends State{
 		
 		bm.sliderButtons.get(0).setVal(25);
 		bm.sliderButtons.get(1).setVal(0);
-		bm.sliderButtons.get(2).setVal(14);
+		bm.sliderButtons.get(2).setVal(28);
 		bm.sliderButtons.get(3).setVal(365);
 		
 	}
@@ -77,13 +82,14 @@ public class SimState extends State{
 		sim.setTimeInfected(bm.sliderButtons.get(2).getVal());
 		sim.setTimeImmune(bm.sliderButtons.get(3).getVal());
 		
-		System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
+		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
 		
 		for(int i = 0; i < 2; i++) {
 			sim.tick();
 		}
 		
 		susceptibleGraph.pop();
+		exposedGraph.pop();
 		infectedGraph.pop();
 		immuneGraph.pop();
 		deadGraph.pop();
@@ -94,19 +100,22 @@ public class SimState extends State{
 		int immune = sim.immune;
 		int susceptible = sim.susceptible;
 		int dead = sim.dead;
+		int exposed = sim.exposed;
 		
-		double[] temp = new double[4];
+		double[] temp = new double[5];
 		
 		temp[0] = (double)susceptible / totalPeople;
 		temp[1] = (double)infected / totalPeople;
 		temp[2] = (double)immune / totalPeople;
 		temp[3] = (double)dead / totalPeople;
+		temp[4] = (double)exposed / totalPeople;
 		
 		
 		susceptibleGraph.add(temp[0]);
 		infectedGraph.add(temp[1]);
 		immuneGraph.add(temp[2]);
 		deadGraph.add(temp[3]);
+		exposedGraph.add(temp[4]);
 	}
 
 	@Override
@@ -117,6 +126,7 @@ public class SimState extends State{
 		
 		
 		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
+		Double[] printExposed = exposedGraph.toArray(new Double[0]);
 		Double[] printInfected = infectedGraph.toArray(new Double[0]);
 		Double[] printImmune = immuneGraph.toArray(new Double[0]);
 		Double[] printDead = deadGraph.toArray(new Double[0]);
@@ -124,6 +134,7 @@ public class SimState extends State{
 		for(int i = 0; i < susceptibleGraph.size(); i++) {
 		
 			int infectedHeight = (int) (graphHeight * printInfected[i]);
+			int exposedHeight = (int) (graphHeight * printExposed[i]);
 			int susceptibleHeight = (int) (graphHeight * printSusceptible[i]);
 			int immuneHeight = (int) (graphHeight * printImmune[i]);
 			int deadHeight = (int) (graphHeight * printDead[i]);
@@ -131,31 +142,37 @@ public class SimState extends State{
 			g.setColor(Color.RED);
 			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight, 3, infectedHeight);
 			
+			g.setColor(Color.pink);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight, 3, exposedHeight);
+			
 			g.setColor(Color.blue);
-			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight, 3, immuneHeight);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight, 3, immuneHeight);
 			
 			g.setColor(Color.white);
-			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight - susceptibleHeight, 3, susceptibleHeight);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight - susceptibleHeight, 3, susceptibleHeight);
 			
 			g.setColor(Color.darkGray);
-			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - immuneHeight - susceptibleHeight - deadHeight, 3, deadHeight);
+			g.drawRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight - susceptibleHeight - deadHeight, 3, deadHeight - 1);
 			
 		}
 		
 		int herdImmunity = (int) (((double)graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
 		
-		System.out.println(MainPanel.HEIGHT - herdImmunity);
+		//System.out.println(MainPanel.HEIGHT - herdImmunity);
 		
 		g.drawLine(0, MainPanel.HEIGHT - herdImmunity, MainPanel.WIDTH, MainPanel.HEIGHT - herdImmunity);
 		
-		g.drawString("Month: " + ((sim.day/30)+1), 700, 25);
-		g.drawString("Susceptible: " + sim.susceptible, 700, 50);
+		
+		g.drawString("Susceptible: " + sim.susceptible, 700, 25);
+		g.drawString("Exposed: " + sim.exposed, 700, 50);
 		g.drawString("Infected: " + sim.infected + "", 700, 75);
 		g.drawString("Immune: " + sim.immune + "", 700, 100);
 		g.drawString("Dead: " + sim.dead + "", 700, 125);
-		g.drawString("Total: " + (sim.susceptible + sim.infected + sim.immune + sim.dead), 700, 150);
-		g.drawString("Percentage Immune or Infected: " + ((sim.infected + sim.immune) / (double) (sim.totalPeople - sim.dead)), 700, 175);
+		g.drawString("Total: " + (sim.susceptible + sim.infected + sim.immune + sim.dead + sim.exposed), 700, 150);
+		g.drawString("Percentage Immune or Infected: " + ((sim.infected + sim.immune + sim.exposed) / (double) (sim.totalPeople - sim.dead)), 700, 175);
 		g.drawString("Estimated Herd Immunity Level " + (1 - 1 / sim.rBase), 700, 200);
+		
+		g.drawString(sim.getTimeElapsed(), 1100, 260);
 		
 	}
 
@@ -189,19 +206,19 @@ public class SimState extends State{
 			for(int i = 0; i < graphWidth; i++) {
 				
 				susceptibleGraph.pop();
+				exposedGraph.pop();
 				infectedGraph.pop();
 				immuneGraph.pop();
 				deadGraph.pop();
 				
 				susceptibleGraph.add((double) 1);
+				exposedGraph.add((double) 0);
 				infectedGraph.add((double) 0);
 				immuneGraph.add((double) 0);
 				deadGraph.add((double) 0);
 			}
-			sim.setSusceptible(sim.totalPeople - 20);
-			sim.setInfected(20);
-			sim.setImmune(0);
-			sim.setDead(0);
+			
+			sim.reset();
 		}
 		
 		if(buttonClicked.equals("Vaccinate")) {

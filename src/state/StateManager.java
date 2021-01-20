@@ -26,12 +26,9 @@ public class StateManager {
 	}
 	
 	public void draw(Graphics g) {
-		
+		states.peek().draw(g);
 		g.drawString(mouse.x + "", mouse.x - 30, mouse.y - 10);
 		g.drawString(mouse.y + "", mouse.x, mouse.y - 10);
-		
-		states.peek().draw(g);
-		
 	}
 	
 	public void keyPressed(int k) {
