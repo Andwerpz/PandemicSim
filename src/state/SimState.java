@@ -56,13 +56,15 @@ public class SimState extends State{
 		
 		bm.addSliderButton(new SliderButton(200, 20, 200, 10, 0, 100, "r0"));
 		bm.addSliderButton(new SliderButton(200, 60, 200, 10, 0, 100, "Mortality Rate"));
-		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 1, 180, "Time Infected"));
-		bm.addSliderButton(new SliderButton(200, 140, 400, 10, 1, 720, "Time Immune"));
+		bm.addSliderButton(new SliderButton(200, 100, 200, 10, 1, 50, "Incubation Time"));
+		bm.addSliderButton(new SliderButton(200, 140, 200, 10, 1, 180, "Time Infected"));
+		bm.addSliderButton(new SliderButton(200, 180, 400, 10, 1, 720, "Time Immune"));
 		
 		bm.sliderButtons.get(0).setVal(25);
 		bm.sliderButtons.get(1).setVal(0);
-		bm.sliderButtons.get(2).setVal(28);
-		bm.sliderButtons.get(3).setVal(365);
+		bm.sliderButtons.get(2).setVal(5);
+		bm.sliderButtons.get(3).setVal(28);
+		bm.sliderButtons.get(4).setVal(365);
 		
 	}
 
@@ -79,8 +81,9 @@ public class SimState extends State{
 		
 		sim.setrBase((double) bm.sliderButtons.get(0).getVal() * 0.1);
 		sim.setMortalityRate((double) bm.sliderButtons.get(1).getVal() * 0.01);
-		sim.setTimeInfected(bm.sliderButtons.get(2).getVal());
-		sim.setTimeImmune(bm.sliderButtons.get(3).getVal());
+		sim.setIncubationTime(bm.sliderButtons.get(2).getVal());
+		sim.setTimeInfected(bm.sliderButtons.get(3).getVal());
+		sim.setTimeImmune(bm.sliderButtons.get(4).getVal());
 		
 		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
 		
