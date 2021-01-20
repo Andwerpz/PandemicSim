@@ -10,7 +10,8 @@ public class Simulator {
 	public int susceptible;
 	public int immune;
 	public int dead;
-	
+	public int day = 0;
+
 	public int timeInfected = 14;
 	public int timeImmune = 365;
 	public double mortalityRate = 0.12;
@@ -63,7 +64,8 @@ public class Simulator {
 	}
 	
 	public void tick() {
-		
+		day++;
+
 		double infectChance = rBase / (double) timeInfected;
 		int numInfected = (int) ((infected * infectChance) * ((double)susceptible / (totalPeople - dead)));
 		

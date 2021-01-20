@@ -148,6 +148,7 @@ public class SimState extends State{
 		
 		g.drawLine(0, MainPanel.HEIGHT - herdImmunity, MainPanel.WIDTH, MainPanel.HEIGHT - herdImmunity);
 		
+		g.drawString("Month: " + ((sim.day/30)+1), 700, 25);
 		g.drawString("Susceptible: " + sim.susceptible, 700, 50);
 		g.drawString("Infected: " + sim.infected + "", 700, 75);
 		g.drawString("Immune: " + sim.immune + "", 700, 100);
