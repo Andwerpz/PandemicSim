@@ -5,6 +5,8 @@ public class Simulator {
 	public int totalPeople = 10000000;	//10 mil
 	
 	public double rBase = 2.5;
+	public double rReal;
+	public double herdImmunityPercentage = 1 - (1 / rBase);
 	
 	public int exposed;
 	public int infected;
@@ -24,6 +26,9 @@ public class Simulator {
 	private boolean vaccinate;
 	private boolean pause;
 	
+	private double handWashingMultiplier = 0;
+	private double socialDistancingMultiplier = 0;
+	
 	public Simulator() {
 		
 		infected = 25;
@@ -37,6 +42,8 @@ public class Simulator {
 		years = 0;
 		
 		pause = false;
+		
+		rReal = rBase;
 		
 	}
 	
@@ -94,6 +101,16 @@ public class Simulator {
 	
 	public void vaccinate() {
 		
+		int numNotSusceptible = immune + infected + exposed;
+		//double percentageNotSusceptible = (double) numNotSusceptible / (totalPeople - dead);
+		
+		int numNeededForHerdImmunity = (int) ((totalPeople - dead) * herdImmunityPercentage);
+		
+		int numVaccinated = numNeededForHerdImmunity - numNotSusceptible;
+		
+		immune += numVaccinated;
+		susceptible -= numVaccinated;
+		
 	}
 	
 	public void reset() {
@@ -126,8 +143,13 @@ public class Simulator {
 			months = 0;
 		}
 		
-		double exposeChance = rBase / (double) timeInfected;
-		int numExposed = (int) ((infected * exposeChance) * ((double) susceptible / (totalPeople - dead)));
+		herdImmunityPercentage = 1 - (1 / rBase);
+		
+		this.rReal = rBase * ((double) susceptible / (totalPeople - dead)) * (1 - handWashingMultiplier) * (1 - socialDistancingMultiplier);
+		
+		double exposeChance = rReal / (double) timeInfected;
+		//int numExposed = (int) ((infected * exposeChance) * ((double) susceptible / (totalPeople - dead)));
+		int numExposed = (int) ((infected * exposeChance));
 		
 		double infectChance = (double) 1 / incubationTime;
 		int numInfected = (int) (exposed * infectChance);
