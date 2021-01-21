@@ -62,7 +62,8 @@ public class SimState extends State{
 		
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
 		bm.addButton(new Button(1125, 55, 70, 25, "Vaccinate"));
-		
+		bm.addButton(new Button(1125, 85, 70, 25, "Pause"));
+
 		bm.addSliderButton(new SliderButton(250, 20, 200, 10, 0, 100, "r0"));
 		bm.addSliderButton(new SliderButton(250, 60, 200, 10, 0, 100, "Mortality Rate"));
 		bm.addSliderButton(new SliderButton(250, 100, 200, 10, 1, 50, "Incubation Time"));
@@ -213,7 +214,9 @@ public class SimState extends State{
 		g.drawString("Immune: " + sim.immune + "", 700, 100);
 		g.drawString("Dead: " + sim.dead + "", 700, 125);
 		g.drawString("Total: " + (sim.susceptible + sim.infected + sim.immune + sim.dead + sim.exposed), 700, 150);
-		g.drawString("Percentage Immune, Exposed, or Infected: " + ((sim.infected + sim.immune + sim.exposed) / (double) (sim.totalPeople - sim.dead)), 700, 175);
+
+		//rounded to hundredth
+		g.drawString("Percentage Immune, Exposed, or Infected: " + (Math.round((sim.infected + sim.immune + sim.exposed) / (double) (sim.totalPeople - sim.dead)*10000))/100.0 +"%", 700, 175);
 		g.drawString("Estimated Herd Immunity Level " + (1 - 1 / sim.rBase), 700, 200);
 		g.drawString("Actual Reproduction Value: " + rReal, 700, 225);
 		
@@ -270,6 +273,10 @@ public class SimState extends State{
 		
 		if(buttonClicked.equals("Vaccinate")) {
 			sim.vaccinate();
+		}
+
+		if(buttonClicked.equals("Pause")){
+			
 		}
 		
 	}
