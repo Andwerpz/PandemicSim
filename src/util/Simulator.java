@@ -24,10 +24,11 @@ public class Simulator {
 	public int years;
 	
 	private boolean pause;
+	private boolean immuneDecay = true;
 	
 	private double handWashingMultiplier = 0;
 	private double socialDistancingMultiplier = 0;
-	public double summerMultiplier = 0;
+	private double summerMultiplier = 0;
 	private double maxSummerMultiplier = 0;
 	
 	public Simulator() {
@@ -56,12 +57,24 @@ public class Simulator {
 		mortalityRate = n;
 	}
 	
+	public void setHandWashingMultiplier(double n) {
+		handWashingMultiplier = n;
+	}
+	
+	public void setSocialDistancingMultiplier(double n) {
+		socialDistancingMultiplier = n;
+	}
+	
 	public void setTimeInfected(int n) {
 		timeInfected = n;
 	}
 	
 	public void setTimeImmune(int n) {
 		timeImmune = n;
+	}
+	
+	public void toggleNoImmuneDecay() {
+		immuneDecay = !immuneDecay;
 	}
 	
 	public void setIncubationTime(int n) {
@@ -93,7 +106,7 @@ public class Simulator {
 	}
 
 	public void togglePause(){
-		pause=!pause;
+		pause = !pause;
 	}
 	
 	public String getTimeElapsed() {
@@ -138,18 +151,34 @@ public class Simulator {
 		
 	}
 	
+	public double getSummerMultiplier() {
+		return summerMultiplier;
+	}
+	
+	public double getMaxSummerMultiplier() {
+		return maxSummerMultiplier;
+	}
+	
+	public double getHandWashingMultiplier() {
+		return handWashingMultiplier;
+	}
+	
+	public double getSocialDistancingMultiplier() {
+		return socialDistancingMultiplier;
+	}
+	
 	public void tick() {
 		
 		days++;
 		
 		if(days == 31) {
 			months++;
-			days = 0;
+			days = 1;
 		}
 		
 		if(months == 13) {
 			years++;
-			months = 0;
+			months = 1;
 		}
 		
 		int dayInYear = days + months * 30;
@@ -178,8 +207,13 @@ public class Simulator {
 		double mortalityChance = (1 / (double)timeInfected) * mortalityRate;
 		int numDead = (int) (infected * mortalityChance);
 		
-		double susceptibleChance = (double) 1 / timeImmune;
-		int numSusceptible = (int) ((immune * susceptibleChance));
+		double susceptibleChance = 0;
+		int numSusceptible = 0;
+		
+		if(immuneDecay) {
+			susceptibleChance = (double) 1 / timeImmune;
+			numSusceptible = (int) ((immune * susceptibleChance));
+		}
 		
 		exposed += numExposed;
 		susceptible -= numExposed;

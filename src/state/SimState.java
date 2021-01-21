@@ -2,6 +2,7 @@ package state;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayDeque;
@@ -12,6 +13,7 @@ import button.Button;
 import button.ButtonManager;
 import button.SliderButton;
 import main.MainPanel;
+import util.GraphicsTools;
 
 public class SimState extends State{
 	
@@ -30,6 +32,10 @@ public class SimState extends State{
 	
 	ArrayDeque<Integer> dateGraph;
 	
+	ArrayDeque<Double> summerGraph;
+	ArrayDeque<Double> handWashingGraph;
+	ArrayDeque<Double> socialDistancingGraph;
+	
 	Simulator sim;
 	
 	int day;
@@ -39,6 +45,7 @@ public class SimState extends State{
 	public SimState(StateManager gsm) {
 		super(gsm);
 		sim = new Simulator();
+		
 		susceptibleGraph = new ArrayDeque<Double>();
 		exposedGraph = new ArrayDeque<Double>();
 		infectedGraph = new ArrayDeque<Double>();
@@ -46,6 +53,10 @@ public class SimState extends State{
 		deadGraph = new ArrayDeque<Double>();
 		
 		dateGraph = new ArrayDeque<Integer>();
+		
+		summerGraph = new ArrayDeque<Double>();
+		handWashingGraph = new ArrayDeque<Double>();
+		socialDistancingGraph = new ArrayDeque<Double>();
 		
 		buttons = new ArrayList<Button>();
 		bm = new ButtonManager();
@@ -58,11 +69,16 @@ public class SimState extends State{
 			deadGraph.add((double) 0);
 			
 			dateGraph.add(0);
+			
+			summerGraph.add((double) 0);
+			handWashingGraph.add((double) 0);
+			socialDistancingGraph.add((double) 0);
 		}
 		
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
 		bm.addButton(new Button(1125, 55, 70, 25, "Vaccinate"));
 		bm.addButton(new Button(1125, 85, 70, 25, "Pause"));
+		bm.addButton(new Button(1125, 115, 70, 25, "Life Immune"));	//makes it so that immunity lasts forever
 
 		bm.addSliderButton(new SliderButton(250, 20, 200, 10, 0, 100, "r0"));
 		bm.addSliderButton(new SliderButton(250, 60, 200, 10, 0, 100, "Mortality Rate"));
@@ -71,6 +87,8 @@ public class SimState extends State{
 		bm.addSliderButton(new SliderButton(250, 180, 400, 10, 1, 720, "Time Immune")); 
 		
 		bm.addSliderButton(new SliderButton(25, 20, 200, 10, 0, 100, "Max Summer Effectiveness"));
+		bm.addSliderButton(new SliderButton(25, 60, 200, 10, 0, 100, "Handwashing Effectiveness"));
+		bm.addSliderButton(new SliderButton(25, 100, 200, 10, 0, 100, "Social Distancing Effectiveness"));
 		
 		bm.sliderButtons.get(0).setVal(25);	//base r0
 		bm.sliderButtons.get(1).setVal(0);	//mortality rate
@@ -79,6 +97,8 @@ public class SimState extends State{
 		bm.sliderButtons.get(4).setVal(365);//in days
 		
 		bm.sliderButtons.get(5).setVal(31);//31% max summer reduction to r0
+		bm.sliderButtons.get(6).setVal(0);//handwashing
+		bm.sliderButtons.get(7).setVal(0);//social distancing
 		
 	}
 
@@ -100,6 +120,8 @@ public class SimState extends State{
 		sim.setTimeImmune(bm.sliderButtons.get(4).getVal());
 		
 		sim.setMaxSummerMultiplier((double) bm.sliderButtons.get(5).getVal());
+		sim.setHandWashingMultiplier((double) bm.sliderButtons.get(6).getVal() / 100);
+		sim.setSocialDistancingMultiplier((double) bm.sliderButtons.get(7).getVal() / 100);
 		
 		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
 		
@@ -114,6 +136,10 @@ public class SimState extends State{
 		deadGraph.pop();
 		
 		dateGraph.pop();
+		
+		summerGraph.pop();
+		handWashingGraph.pop();
+		socialDistancingGraph.pop();
 		
 		int totalPeople = sim.totalPeople;
 		
@@ -153,14 +179,20 @@ public class SimState extends State{
 		day = sim.days;
 		month = sim.months;
 		year = sim.years;
+		
+		summerGraph.add(sim.getSummerMultiplier());
+		handWashingGraph.add(sim.getHandWashingMultiplier());
+		socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
+		
+		System.out.println(sim.getHandWashingMultiplier());
 	}
 
 	@Override
 	public void draw(Graphics g) {
 		
+		Graphics2D g2d = (Graphics2D) g;
+		
 		bm.draw(g);
-		
-		
 		
 		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
 		Double[] printExposed = exposedGraph.toArray(new Double[0]);
@@ -169,6 +201,10 @@ public class SimState extends State{
 		Double[] printDead = deadGraph.toArray(new Double[0]);
 		
 		Integer[] printDate = dateGraph.toArray(new Integer[0]);
+		
+		Double[] printSummer = summerGraph.toArray(new Double[0]);
+		Double[] printHandWashing = handWashingGraph.toArray(new Double[0]);
+		Double[] printSocialDistancing = socialDistancingGraph.toArray(new Double[0]);
 		
 		for(int i = 0; i < susceptibleGraph.size(); i++) {
 		
@@ -196,7 +232,27 @@ public class SimState extends State{
 			g.setColor(Color.BLACK);
 			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 1, printDate[i] * 10);
 			
+			g2d.setComposite(GraphicsTools.makeComposite((printSummer[i])));
+			g2d.setColor(Color.orange);
+			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight, 3, 10);
+			//g2d.setComposite(GraphicsTools.makeComposite((1)));
+			
+			g2d.setComposite(GraphicsTools.makeComposite((printHandWashing[i])));
+			g2d.setColor(Color.cyan);
+			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 10, 3, 10);
+			//g2d.setComposite(GraphicsTools.makeComposite((1)));
+			
+			g2d.setComposite(GraphicsTools.makeComposite((printSocialDistancing[i])));
+			g2d.setColor(Color.green);
+			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 3, 10);
+			g2d.setComposite(GraphicsTools.makeComposite((1)));
+			
 		}
+		
+		g.setColor(Color.black);
+		
+		//g2d.setComposite(GraphicsTools.makeComposite((float) 0.75));
+		//g2d.fillRect(100, 100, 10000, 1000);
 		
 		int herdImmunity = (int) (((double)graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
 		
@@ -222,7 +278,7 @@ public class SimState extends State{
 		
 		g.drawString(sim.getTimeElapsed(), 1100, 260);
 		
-		g.fillRect(50, 300, (int) sim.summerMultiplier, 10);
+		//g.fillRect(50, 300, (int) sim.summerMultiplier, 10);
 		
 	}
 
@@ -262,12 +318,21 @@ public class SimState extends State{
 				deadGraph.pop();
 				dateGraph.pop();
 				
+				summerGraph.pop();
+				handWashingGraph.pop();
+				socialDistancingGraph.pop();
+				
+				
 				susceptibleGraph.add((double) 1);
 				exposedGraph.add((double) 0);
 				infectedGraph.add((double) 0);
 				immuneGraph.add((double) 0);
 				deadGraph.add((double) 0);
 				dateGraph.add(0);
+				
+				summerGraph.add((double) 0);
+				handWashingGraph.add((double) 0);
+				socialDistancingGraph.add((double) 0);
 			}
 			
 			sim.reset();
@@ -279,6 +344,10 @@ public class SimState extends State{
 
 		if(buttonClicked.equals("Pause")){
 			//sim.toggle();
+		}
+		
+		if(buttonClicked.equals("Life Immune")) {
+			sim.toggleNoImmuneDecay();
 		}
 		
 	}
