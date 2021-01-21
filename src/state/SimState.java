@@ -13,22 +13,18 @@ import button.Button;
 import button.ButtonManager;
 import button.SliderButton;
 import main.MainPanel;
+import util.Graph;
 import util.GraphicsTools;
 
 public class SimState extends State{
 	
-	public int graphWidth = MainPanel.WIDTH / 2 + 5;
+	public int graphWidth = MainPanel.WIDTH;
 	public int graphHeight = 400;
+	public int graphLength = 800;
 	
 	ArrayList<Button> buttons;
 	
 	ButtonManager bm;
-	
-	ArrayDeque<Double> susceptibleGraph;
-	ArrayDeque<Double> exposedGraph;
-	ArrayDeque<Double> infectedGraph;
-	ArrayDeque<Double> immuneGraph;
-	ArrayDeque<Double> deadGraph;
 	
 	ArrayDeque<Integer> dateGraph;
 	
@@ -37,6 +33,7 @@ public class SimState extends State{
 	ArrayDeque<Double> socialDistancingGraph;
 	
 	Simulator sim;
+	Graph graph;
 	
 	boolean pause=false;
 
@@ -48,16 +45,9 @@ public class SimState extends State{
 		super(gsm);
 		sim = new Simulator();
 		
-		susceptibleGraph = new ArrayDeque<Double>();
-		exposedGraph = new ArrayDeque<Double>();
-		infectedGraph = new ArrayDeque<Double>();
-		immuneGraph = new ArrayDeque<Double>();
-		deadGraph = new ArrayDeque<Double>();
-		
 		dateGraph = new ArrayDeque<Integer>();
 		
 		summerGraph = new ArrayDeque<Double>();
-
 		handWashingGraph = new ArrayDeque<Double>();
 		socialDistancingGraph = new ArrayDeque<Double>();
 
@@ -65,21 +55,23 @@ public class SimState extends State{
 		buttons = new ArrayList<Button>();
 		bm = new ButtonManager();
 		
-		for(int i = 0; i < graphWidth; i++) {
-			susceptibleGraph.add((double) 1);
-			exposedGraph.add((double) 0);
-			infectedGraph.add((double) 0);
-			immuneGraph.add((double) 0);
-			deadGraph.add((double) 0);
+		graph = new Graph(0, MainPanel.HEIGHT - graphHeight, graphWidth, graphHeight, graphLength, 5);
+		
+		for(int i = 0; i < graphLength; i++) {
 			
 			dateGraph.add(0);
 			
 			summerGraph.add((double) 0);
-
 			handWashingGraph.add((double) 0);
 			socialDistancingGraph.add((double) 0);
 
 		}
+		
+		graph.setColor(4, Color.BLACK);
+		graph.setColor(3, Color.WHITE);
+		graph.setColor(2, Color.BLUE);
+		graph.setColor(1, Color.PINK);
+		graph.setColor(0, Color.RED);
 		
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
 		bm.addButton(new Button(1125, 55, 70, 25, "Vaccinate"));
@@ -118,7 +110,12 @@ public class SimState extends State{
 	public void tick(Point mouse) {
 		
 		bm.tick(mouse);
-		
+//		graph.x = mouse.x;
+//		graph.y = mouse.y;
+//		
+//		graph.graphWidth = 100;
+//		graph.graphHeight = 100;
+//		
 		sim.setrBase((double) bm.sliderButtons.get(0).getVal() * 0.1);
 		sim.setMortalityRate((double) bm.sliderButtons.get(1).getVal() * 0.01);
 		sim.setIncubationTime(bm.sliderButtons.get(2).getVal());
@@ -134,12 +131,6 @@ public class SimState extends State{
 			for(int i = 0; i < 4; i++) {
 				sim.tick();
 			}
-			
-			susceptibleGraph.pop();
-			exposedGraph.pop();
-			infectedGraph.pop();
-			immuneGraph.pop();
-			deadGraph.pop();
 			
 			dateGraph.pop();
 			
@@ -158,18 +149,13 @@ public class SimState extends State{
 			
 			double[] temp = new double[5];
 			
-			temp[0] = (double)susceptible / totalPeople;
-			temp[1] = (double)infected / totalPeople;
+			temp[3] = (double)susceptible / totalPeople;
+			temp[0] = (double)infected / totalPeople;
 			temp[2] = (double)immune / totalPeople;
-			temp[3] = (double)dead / totalPeople;
-			temp[4] = (double)exposed / totalPeople;
+			temp[4] = (double)dead / totalPeople;
+			temp[1] = (double)exposed / totalPeople;
 			
-			
-			susceptibleGraph.add(temp[0]);
-			infectedGraph.add(temp[1]);
-			immuneGraph.add(temp[2]);
-			deadGraph.add(temp[3]);
-			exposedGraph.add(temp[4]);
+			graph.updateGraph(temp);
 			
 			if(month > sim.months) {
 				dateGraph.add(2);
@@ -191,7 +177,7 @@ public class SimState extends State{
 			handWashingGraph.add(sim.getHandWashingMultiplier());
 			socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
 			
-			System.out.println(sim.getHandWashingMultiplier());
+			//System.out.println(sim.getHandWashingMultiplier());
 		}
 	}
 
@@ -202,57 +188,36 @@ public class SimState extends State{
 		
 		bm.draw(g);
 		
-		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
-		Double[] printExposed = exposedGraph.toArray(new Double[0]);
-		Double[] printInfected = infectedGraph.toArray(new Double[0]);
-		Double[] printImmune = immuneGraph.toArray(new Double[0]);
-		Double[] printDead = deadGraph.toArray(new Double[0]);
-		
 		Integer[] printDate = dateGraph.toArray(new Integer[0]);
 		
 		Double[] printSummer = summerGraph.toArray(new Double[0]);
 		Double[] printHandWashing = handWashingGraph.toArray(new Double[0]);
 		Double[] printSocialDistancing = socialDistancingGraph.toArray(new Double[0]);
 		
-		for(int i = 0; i < susceptibleGraph.size(); i++) {
+		graph.draw(g);
 		
-			int infectedHeight = (int) (graphHeight * printInfected[i]);
-			int exposedHeight = (int) (graphHeight * printExposed[i]);
-			int susceptibleHeight = (int) (graphHeight * printSusceptible[i]);
-			int immuneHeight = (int) (graphHeight * printImmune[i]);
-			int deadHeight = (int) (graphHeight * printDead[i]);
-			
-			g.setColor(Color.RED);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight, 3, infectedHeight);
-			
-			g.setColor(Color.pink);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight, 3, exposedHeight);
-			
-			g.setColor(Color.blue);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight, 3, immuneHeight);
-			
-			g.setColor(Color.white);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight - susceptibleHeight, 3, susceptibleHeight);
-			
-			g.setColor(Color.darkGray);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - infectedHeight - exposedHeight - immuneHeight - susceptibleHeight - deadHeight, 3, deadHeight - 1);
+		double unitWidth = (double) graphWidth / graphLength;
+		
+		for(int i = 0; i < graphLength; i++) {
 			
 			g.setColor(Color.BLACK);
-			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 1, printDate[i] * 10);
+			g.fillRect((int)(i * unitWidth), MainPanel.HEIGHT - graphHeight - 20, 1, printDate[i] * 10);
+			
+			
 			
 			g2d.setComposite(GraphicsTools.makeComposite((printSummer[i])));
 			g2d.setColor(Color.orange);
-			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight, 3, 10);
+			g2d.fillRect((int)(i * unitWidth), MainPanel.HEIGHT - graphHeight, (int)unitWidth + 1, 10);
 			//g2d.setComposite(GraphicsTools.makeComposite((1)));
 			
 			g2d.setComposite(GraphicsTools.makeComposite((printHandWashing[i])));
 			g2d.setColor(Color.cyan);
-			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 10, 3, 10);
+			g2d.fillRect((int)(i * unitWidth), MainPanel.HEIGHT - graphHeight - 10, (int)unitWidth + 1, 10);
 			//g2d.setComposite(GraphicsTools.makeComposite((1)));
 			
 			g2d.setComposite(GraphicsTools.makeComposite((printSocialDistancing[i])));
 			g2d.setColor(Color.green);
-			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 3, 10);
+			g2d.fillRect((int)(i * unitWidth), MainPanel.HEIGHT - graphHeight - 20, (int)unitWidth + 1, 10);
 			g2d.setComposite(GraphicsTools.makeComposite((1)));
 			
 		}
@@ -316,35 +281,25 @@ public class SimState extends State{
 		if(buttonClicked.equals("Reset")) {
 			
 			//System.out.println("hey");
-			
+			graph.reset();
 			for(int i = 0; i < graphWidth; i++) {
-				
-				susceptibleGraph.pop();
-				exposedGraph.pop();
-				infectedGraph.pop();
-				immuneGraph.pop();
-				deadGraph.pop();
+		
 				dateGraph.pop();
 				
 				summerGraph.pop();
 				handWashingGraph.pop();
 				socialDistancingGraph.pop();
 				
-				
-				susceptibleGraph.add((double) 1);
-				exposedGraph.add((double) 0);
-				infectedGraph.add((double) 0);
-				immuneGraph.add((double) 0);
-				deadGraph.add((double) 0);
+
 				dateGraph.add(0);
-				
+
 				summerGraph.add((double) 0);
 				handWashingGraph.add((double) 0);
 				socialDistancingGraph.add((double) 0);
 			}
-			day=0;
-			month=1;
-			year=0;
+			day = 0;
+			month = 1;
+			year = 0;
 
 			sim.reset();
 		}
