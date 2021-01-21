@@ -297,9 +297,11 @@ public class SimState extends State{
 				handWashingGraph.add((double) 0);
 				socialDistancingGraph.add((double) 0);
 			}
+
 			day = 0;
 			month = 1;
 			year = 0;
+
 
 			sim.reset();
 		}
