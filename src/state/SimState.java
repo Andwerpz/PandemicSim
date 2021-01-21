@@ -343,7 +343,7 @@ public class SimState extends State{
 				socialDistancingGraph.add((double) 0);
 			}
 			day=0;
-			month=1;
+			month=0;
 			year=0;
 
 			sim.reset();
