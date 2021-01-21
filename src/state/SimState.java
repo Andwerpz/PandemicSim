@@ -38,6 +38,8 @@ public class SimState extends State{
 	
 	Simulator sim;
 	
+	boolean pause=false;
+
 	int day;
 	int month;
 	int year;
@@ -128,68 +130,69 @@ public class SimState extends State{
 		sim.setSocialDistancingMultiplier((double) bm.sliderButtons.get(7).getVal() / 100);
 		
 		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
-		
-		for(int i = 0; i < 4; i++) {
-			sim.tick();
-		}
-		
-		susceptibleGraph.pop();
-		exposedGraph.pop();
-		infectedGraph.pop();
-		immuneGraph.pop();
-		deadGraph.pop();
-		
-		dateGraph.pop();
-		
-		summerGraph.pop();
-		handWashingGraph.pop();
-		socialDistancingGraph.pop();
+		if(!pause){
+			for(int i = 0; i < 4; i++) {
+				sim.tick();
+			}
+			
+			susceptibleGraph.pop();
+			exposedGraph.pop();
+			infectedGraph.pop();
+			immuneGraph.pop();
+			deadGraph.pop();
+			
+			dateGraph.pop();
+			
+			summerGraph.pop();
+			handWashingGraph.pop();
+			socialDistancingGraph.pop();
 
-		
-		int totalPeople = sim.totalPeople;
-		
-		int infected = sim.infected;
-		int immune = sim.immune;
-		int susceptible = sim.susceptible;
-		int dead = sim.dead;
-		int exposed = sim.exposed;
-		
-		double[] temp = new double[5];
-		
-		temp[0] = (double)susceptible / totalPeople;
-		temp[1] = (double)infected / totalPeople;
-		temp[2] = (double)immune / totalPeople;
-		temp[3] = (double)dead / totalPeople;
-		temp[4] = (double)exposed / totalPeople;
-		
-		
-		susceptibleGraph.add(temp[0]);
-		infectedGraph.add(temp[1]);
-		immuneGraph.add(temp[2]);
-		deadGraph.add(temp[3]);
-		exposedGraph.add(temp[4]);
-		
-		if(month > sim.months) {
-			dateGraph.add(2);
-		}
+			
+			int totalPeople = sim.totalPeople;
+			
+			int infected = sim.infected;
+			int immune = sim.immune;
+			int susceptible = sim.susceptible;
+			int dead = sim.dead;
+			int exposed = sim.exposed;
+			
+			double[] temp = new double[5];
+			
+			temp[0] = (double)susceptible / totalPeople;
+			temp[1] = (double)infected / totalPeople;
+			temp[2] = (double)immune / totalPeople;
+			temp[3] = (double)dead / totalPeople;
+			temp[4] = (double)exposed / totalPeople;
+			
+			
+			susceptibleGraph.add(temp[0]);
+			infectedGraph.add(temp[1]);
+			immuneGraph.add(temp[2]);
+			deadGraph.add(temp[3]);
+			exposedGraph.add(temp[4]);
+			
+			if(month > sim.months) {
+				dateGraph.add(2);
+			}
 
-		else if(day > sim.days) {
-			dateGraph.add(1);			
+			else if(day > sim.days) {
+				dateGraph.add(1);			
+			}
+			
+			else {
+				dateGraph.add(0);
+			}
+			
+			day = sim.days;
+			month = sim.months;
+			year = sim.years;
+			
+			summerGraph.add(sim.getSummerMultiplier());
+			handWashingGraph.add(sim.getHandWashingMultiplier());
+			socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
+			
+			System.out.println(sim.getHandWashingMultiplier());
 		}
-		
-		else {
-			dateGraph.add(0);
-		}
-		
-		day = sim.days;
-		month = sim.months;
-		year = sim.years;
-		
-		summerGraph.add(sim.getSummerMultiplier());
-		handWashingGraph.add(sim.getHandWashingMultiplier());
-		socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
-		
-		System.out.println(sim.getHandWashingMultiplier());
 	}
 
 	@Override
@@ -250,7 +253,6 @@ public class SimState extends State{
 			g2d.setComposite(GraphicsTools.makeComposite((printSocialDistancing[i])));
 			g2d.setColor(Color.green);
 			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 3, 10);
-			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight, 3, graphHeight);
 			g2d.setComposite(GraphicsTools.makeComposite((1)));
 			
 		}
@@ -340,7 +342,10 @@ public class SimState extends State{
 				handWashingGraph.add((double) 0);
 				socialDistancingGraph.add((double) 0);
 			}
-			
+			day=0;
+			month=1;
+			year=0;
+
 			sim.reset();
 		}
 		
@@ -349,7 +354,7 @@ public class SimState extends State{
 		}
 
 		if(buttonClicked.equals("Pause")){
-			//sim.toggle();
+			pause=!pause;
 		}
 		
 		if(buttonClicked.equals("Life Immune")) {

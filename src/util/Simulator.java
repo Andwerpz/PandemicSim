@@ -143,7 +143,7 @@ public class Simulator {
 		dead = 0;
 		
 		days = 0;
-		months = 0;
+		months = 1;
 		years = 0;
 	}
 	
