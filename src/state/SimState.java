@@ -55,8 +55,10 @@ public class SimState extends State{
 		dateGraph = new ArrayDeque<Integer>();
 		
 		summerGraph = new ArrayDeque<Double>();
+
 		handWashingGraph = new ArrayDeque<Double>();
 		socialDistancingGraph = new ArrayDeque<Double>();
+
 		
 		buttons = new ArrayList<Button>();
 		bm = new ButtonManager();
@@ -71,8 +73,10 @@ public class SimState extends State{
 			dateGraph.add(0);
 			
 			summerGraph.add((double) 0);
+
 			handWashingGraph.add((double) 0);
 			socialDistancingGraph.add((double) 0);
+
 		}
 		
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
@@ -140,6 +144,7 @@ public class SimState extends State{
 		summerGraph.pop();
 		handWashingGraph.pop();
 		socialDistancingGraph.pop();
+
 		
 		int totalPeople = sim.totalPeople;
 		
@@ -245,6 +250,7 @@ public class SimState extends State{
 			g2d.setComposite(GraphicsTools.makeComposite((printSocialDistancing[i])));
 			g2d.setColor(Color.green);
 			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 3, 10);
+			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight, 3, graphHeight);
 			g2d.setComposite(GraphicsTools.makeComposite((1)));
 			
 		}
