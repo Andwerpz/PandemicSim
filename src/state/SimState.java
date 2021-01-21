@@ -2,6 +2,7 @@ package state;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayDeque;
@@ -12,6 +13,7 @@ import button.Button;
 import button.ButtonManager;
 import button.SliderButton;
 import main.MainPanel;
+import util.GraphicsTools;
 
 public class SimState extends State{
 	
@@ -30,6 +32,8 @@ public class SimState extends State{
 	
 	ArrayDeque<Integer> dateGraph;
 	
+	ArrayDeque<Double> summerGraph;
+	
 	Simulator sim;
 	
 	int day;
@@ -39,6 +43,7 @@ public class SimState extends State{
 	public SimState(StateManager gsm) {
 		super(gsm);
 		sim = new Simulator();
+		
 		susceptibleGraph = new ArrayDeque<Double>();
 		exposedGraph = new ArrayDeque<Double>();
 		infectedGraph = new ArrayDeque<Double>();
@@ -46,6 +51,8 @@ public class SimState extends State{
 		deadGraph = new ArrayDeque<Double>();
 		
 		dateGraph = new ArrayDeque<Integer>();
+		
+		summerGraph = new ArrayDeque<Double>();
 		
 		buttons = new ArrayList<Button>();
 		bm = new ButtonManager();
@@ -58,6 +65,8 @@ public class SimState extends State{
 			deadGraph.add((double) 0);
 			
 			dateGraph.add(0);
+			
+			summerGraph.add((double) 0);
 		}
 		
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
@@ -115,6 +124,8 @@ public class SimState extends State{
 		
 		dateGraph.pop();
 		
+		summerGraph.pop();
+		
 		int totalPeople = sim.totalPeople;
 		
 		int infected = sim.infected;
@@ -153,14 +164,16 @@ public class SimState extends State{
 		day = sim.days;
 		month = sim.months;
 		year = sim.years;
+		
+		summerGraph.add(sim.getSummerMultiplier());
 	}
 
 	@Override
 	public void draw(Graphics g) {
 		
+		Graphics2D g2d = (Graphics2D) g;
+		
 		bm.draw(g);
-		
-		
 		
 		Double[] printSusceptible = susceptibleGraph.toArray(new Double[0]);
 		Double[] printExposed = exposedGraph.toArray(new Double[0]);
@@ -169,6 +182,8 @@ public class SimState extends State{
 		Double[] printDead = deadGraph.toArray(new Double[0]);
 		
 		Integer[] printDate = dateGraph.toArray(new Integer[0]);
+		
+		Double[] printSummer = summerGraph.toArray(new Double[0]);
 		
 		for(int i = 0; i < susceptibleGraph.size(); i++) {
 		
@@ -196,7 +211,17 @@ public class SimState extends State{
 			g.setColor(Color.BLACK);
 			g.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight - 20, 1, printDate[i] * 10);
 			
+			g2d.setComposite(GraphicsTools.makeComposite((printSummer[i])));
+			g2d.setColor(Color.orange);
+			g2d.fillRect(i * 2 - 2, MainPanel.HEIGHT - graphHeight, 3, graphHeight);
+			g2d.setComposite(GraphicsTools.makeComposite((1)));
+			
 		}
+		
+		g.setColor(Color.black);
+		
+		//g2d.setComposite(GraphicsTools.makeComposite((float) 0.75));
+		//g2d.fillRect(100, 100, 10000, 1000);
 		
 		int herdImmunity = (int) (((double)graphHeight * ((sim.totalPeople - sim.dead) / (double) sim.totalPeople)) * (1 - 1 / sim.rBase));
 		
@@ -222,7 +247,7 @@ public class SimState extends State{
 		
 		g.drawString(sim.getTimeElapsed(), 1100, 260);
 		
-		g.fillRect(50, 300, (int) sim.summerMultiplier, 10);
+		//g.fillRect(50, 300, (int) sim.summerMultiplier, 10);
 		
 	}
 

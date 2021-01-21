@@ -27,7 +27,7 @@ public class Simulator {
 	
 	private double handWashingMultiplier = 0;
 	private double socialDistancingMultiplier = 0;
-	public double summerMultiplier = 0;
+	private double summerMultiplier = 0;
 	private double maxSummerMultiplier = 0;
 	
 	public Simulator() {
@@ -138,18 +138,26 @@ public class Simulator {
 		
 	}
 	
+	public double getSummerMultiplier() {
+		return summerMultiplier;
+	}
+	
+	public double getMaxSummerMultiplier() {
+		return maxSummerMultiplier;
+	}
+	
 	public void tick() {
 		
 		days++;
 		
 		if(days == 31) {
 			months++;
-			days = 0;
+			days = 1;
 		}
 		
 		if(months == 13) {
 			years++;
-			months = 0;
+			months = 1;
 		}
 		
 		int dayInYear = days + months * 30;
