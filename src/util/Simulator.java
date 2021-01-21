@@ -144,12 +144,12 @@ public class Simulator {
 		
 		if(days == 31) {
 			months++;
-			days = 0;
+			days = 1;
 		}
 		
 		if(months == 13) {
 			years++;
-			months = 0;
+			months = 1;
 		}
 		
 		int dayInYear = days + months * 30;
