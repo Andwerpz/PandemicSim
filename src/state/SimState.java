@@ -260,12 +260,14 @@ public class SimState extends State{
 				infectedGraph.pop();
 				immuneGraph.pop();
 				deadGraph.pop();
+				dateGraph.pop();
 				
 				susceptibleGraph.add((double) 1);
 				exposedGraph.add((double) 0);
 				infectedGraph.add((double) 0);
 				immuneGraph.add((double) 0);
 				deadGraph.add((double) 0);
+				dateGraph.add(0);
 			}
 			
 			sim.reset();
@@ -276,7 +278,7 @@ public class SimState extends State{
 		}
 
 		if(buttonClicked.equals("Pause")){
-			
+			//sim.toggle();
 		}
 		
 	}

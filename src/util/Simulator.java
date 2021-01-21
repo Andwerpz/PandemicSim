@@ -23,7 +23,6 @@ public class Simulator {
 	public int months;
 	public int years;
 	
-	private boolean vaccinate;
 	private boolean pause;
 	
 	private double handWashingMultiplier = 0;
@@ -91,6 +90,10 @@ public class Simulator {
 	
 	public void setDead(int n) {
 		dead = n;
+	}
+
+	public void togglePause(){
+		pause=!pause;
 	}
 	
 	public String getTimeElapsed() {
