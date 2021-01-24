@@ -96,6 +96,12 @@ public class ButtonManager {
 				return buttons.get(i).getText();
 			}
 		}
+
+		for(int i = 0;i < toggleButtons.size();i++){
+			if(toggleButtons.get(i).isClicked(arg0)){
+				return toggleButtons.get(i).getText();
+			}
+		}
 		
 		return null;
 		
