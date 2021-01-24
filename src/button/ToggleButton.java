@@ -9,23 +9,37 @@ import java.awt.image.BufferedImage;
 import java.awt.Rectangle;
 
 public class ToggleButton extends Button{
+	
     private boolean toggled = false;
+    private Color toggledColor;
 
     public ToggleButton(int x, int y, int width, int height, String text){
         super(x,y,width,height,text);
+        this.toggledColor = Color.gray;
     }
     
     @Override
     public void draw(Graphics g) {
+    	
+    	g.setColor(Color.WHITE);
+    	
+		if(toggled){
+        	g.setColor(toggledColor);
+            
+        }
+		
+		if(getPressed()) {
+			g.setColor(getColor());
+		}
+		
+		g.fillRect((int)getX(), (int)getY(), getWidth(), getHeight());
 		
 		g.setColor(getColor());
 		g.setFont(getFont());
 		g.drawRect((int) getX(), (int)getY(), getWidth(), getHeight());
 		g.drawString(getText(), (int) getX() + (getWidth() / 2) - (getTextWidth() / 2), (int) getY() + (getHeight() / 2) + getFont().getSize() / 2);
         
-        if(toggled || getPressed()){
-            g.fillRect((int)getX(), (int)getY(), getWidth(), getHeight());
-        }
+        
     } 
     @Override
     public boolean isClicked(MouseEvent arg0) {

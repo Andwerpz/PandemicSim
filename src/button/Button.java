@@ -15,6 +15,7 @@ public class Button{
 	private String text;
 	private boolean pressed = false;
 	private Font font;
+	
 	private Color color;
 	
 	private int textWidth;
@@ -112,6 +113,7 @@ public class Button{
 	public boolean getPressed(){
 		return pressed;
 	}
+
 	
 	public void pressed(MouseEvent m) {
 		Rectangle r = new Rectangle(x, y, width, height);
