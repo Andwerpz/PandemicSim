@@ -9,12 +9,14 @@ public class ButtonManager {
 	
 	public ArrayList<Button> buttons;
 	public ArrayList<SliderButton> sliderButtons;
+	public ArrayList<ToggleButton> toggleButtons;
 
 	public ButtonManager() {
 		
 		buttons = new ArrayList<Button>();
 		sliderButtons = new ArrayList<SliderButton>();
-		
+		toggleButtons = new ArrayList<ToggleButton>();	
+
 	}
 	
 	public void setText(int buttonType, int index, String text) {
@@ -29,6 +31,8 @@ public class ButtonManager {
 			sliderButtons.get(index).setText(text);
 			return;
 		
+		case 2:
+			toggleButtons.get(index).setText(text);
 		}
 		
 	}
@@ -40,6 +44,10 @@ public class ButtonManager {
 	public void addSliderButton(SliderButton b) {
 		sliderButtons.add(b);
 	}
+
+	public void addToggleButton(ToggleButton b){
+		toggleButtons.add(b);
+	}
 	
 	public void draw(Graphics g) {
 		
@@ -48,6 +56,10 @@ public class ButtonManager {
 		}
 		
 		for(SliderButton b : sliderButtons) {
+			b.draw(g);
+		}
+
+		for(ToggleButton b : toggleButtons){
 			b.draw(g);
 		}
 		
@@ -68,6 +80,10 @@ public class ButtonManager {
 		}
 		
 		for(SliderButton b : sliderButtons) {
+			b.pressed(arg0);
+		}
+
+		for(ToggleButton b : toggleButtons) {
 			b.pressed(arg0);
 		}
 		
@@ -92,6 +108,10 @@ public class ButtonManager {
 		}
 		
 		for(SliderButton b : sliderButtons) {
+			b.released();
+		}
+
+		for(ToggleButton b : toggleButtons) {
 			b.released();
 		}
 		

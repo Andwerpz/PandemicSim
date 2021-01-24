@@ -12,6 +12,7 @@ import util.Simulator;
 import button.Button;
 import button.ButtonManager;
 import button.SliderButton;
+import button.ToggleButton;
 import main.MainPanel;
 import util.Graph;
 import util.GraphicsTools;
@@ -40,6 +41,10 @@ public class SimState extends State{
 	int day;
 	int month;
 	int year;
+	
+	int simSpeed = 5;
+	int speedLimit = 5;
+	int speedCount = 0;
 
 	public SimState(StateManager gsm) {
 		super(gsm);
@@ -76,7 +81,7 @@ public class SimState extends State{
 		bm.addButton(new Button(1125, 25, 70, 25, "Reset"));
 		bm.addButton(new Button(1125, 55, 70, 25, "Vaccinate"));
 		bm.addButton(new Button(1125, 85, 70, 25, "Pause"));
-		bm.addButton(new Button(1125, 115, 70, 25, "Life Immune"));	//makes it so that immunity lasts forever
+		bm.addToggleButton(new ToggleButton(1125, 115, 70, 25, "Life Immune"));	//makes it so that immunity lasts forever
 
 		bm.addSliderButton(new SliderButton(250, 20, 200, 10, 0, 100, "r0"));
 		bm.addSliderButton(new SliderButton(250, 60, 200, 10, 0, 100, "Mortality Rate"));
@@ -87,6 +92,7 @@ public class SimState extends State{
 		bm.addSliderButton(new SliderButton(25, 20, 200, 10, 0, 100, "Max Summer Effectiveness"));
 		bm.addSliderButton(new SliderButton(25, 60, 200, 10, 0, 100, "Handwashing Effectiveness"));
 		bm.addSliderButton(new SliderButton(25, 100, 200, 10, 0, 100, "Social Distancing Effectiveness"));
+		bm.addSliderButton(new SliderButton(25, 140, 200, 10, 1, 15, "Simulation Speed"));
 		
 		bm.sliderButtons.get(0).setVal(25);	//base r0
 		bm.sliderButtons.get(1).setVal(0);	//mortality rate
@@ -97,6 +103,7 @@ public class SimState extends State{
 		bm.sliderButtons.get(5).setVal(31);//31% max summer reduction to r0
 		bm.sliderButtons.get(6).setVal(0);//handwashing
 		bm.sliderButtons.get(7).setVal(0);//social distancing
+		bm.sliderButtons.get(8).setVal(5); //simSpeed
 		
 	}
 
@@ -108,7 +115,6 @@ public class SimState extends State{
 
 	@Override
 	public void tick(Point mouse) {
-		
 		bm.tick(mouse);
 //		graph.x = mouse.x;
 //		graph.y = mouse.y;
@@ -125,65 +131,70 @@ public class SimState extends State{
 		sim.setMaxSummerMultiplier((double) bm.sliderButtons.get(5).getVal());
 		sim.setHandWashingMultiplier((double) bm.sliderButtons.get(6).getVal() / 100);
 		sim.setSocialDistancingMultiplier((double) bm.sliderButtons.get(7).getVal() / 100);
+		simSpeed=(bm.sliderButtons.get(8).getVal());
 		
 		//System.out.println(1 - 1 / sim.rBase);	//percentage for herd immunity
-		if(!pause){
-			for(int i = 0; i < 4; i++) {
-				sim.tick();
-			}
-			
-			dateGraph.pop();
-			
-			summerGraph.pop();
-			handWashingGraph.pop();
-			socialDistancingGraph.pop();
+		for(int j = 0;j<simSpeed;j++){
+			speedCount++;
+			speedCount%=speedLimit;
+			if(!pause&&speedCount%speedLimit==0){
+				for(int i = 0; i < 4; i++) {
+					sim.tick();
+				}
+				
+				dateGraph.pop();
+				
+				summerGraph.pop();
+				handWashingGraph.pop();
+				socialDistancingGraph.pop();
 
-			
-			int totalPeople = sim.totalPeople;
-			
-			int infected = sim.infected;
-			int immune = sim.immune;
-			int susceptible = sim.susceptible;
-			int dead = sim.dead;
-			int exposed = sim.exposed;
-			
-			double[] temp = new double[5];
-			
-			temp[3] = (double)susceptible / totalPeople;
-			temp[0] = (double)infected / totalPeople;
-			temp[2] = (double)immune / totalPeople;
-			temp[4] = (double)dead / totalPeople;
-			temp[1] = (double)exposed / totalPeople;
-			
-			graph.updateGraph(temp);
-			
-			if(month > sim.months) {
-				dateGraph.add(2);
-			}
+				
+				int totalPeople = sim.totalPeople;
+				
+				int infected = sim.infected;
+				int immune = sim.immune;
+				int susceptible = sim.susceptible;
+				int dead = sim.dead;
+				int exposed = sim.exposed;
+				
+				double[] temp = new double[5];
+				
+				temp[3] = (double)susceptible / totalPeople;
+				temp[0] = (double)infected / totalPeople;
+				temp[2] = (double)immune / totalPeople;
+				temp[4] = (double)dead / totalPeople;
+				temp[1] = (double)exposed / totalPeople;
+				
+				graph.updateGraph(temp);
+				
+				if(month > sim.months) {
+					dateGraph.add(2);
+				}
 
-			else if(day > sim.days) {
-				dateGraph.add(1);			
+				else if(day > sim.days) {
+					dateGraph.add(1);			
+				}
+				
+				else {
+					dateGraph.add(0);
+				}
+				
+				day = sim.days;
+				month = sim.months;
+				year = sim.years;
+				
+				summerGraph.add(sim.getSummerMultiplier());
+				handWashingGraph.add(sim.getHandWashingMultiplier());
+				socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
+
+				
+				//System.out.println(sim.getHandWashingMultiplier());
 			}
-			
-			else {
-				dateGraph.add(0);
-			}
-			
-			day = sim.days;
-			month = sim.months;
-			year = sim.years;
-			
-			summerGraph.add(sim.getSummerMultiplier());
-			handWashingGraph.add(sim.getHandWashingMultiplier());
-			socialDistancingGraph.add(sim.getSocialDistancingMultiplier());
-			
-			//System.out.println(sim.getHandWashingMultiplier());
 		}
 	}
 
 	@Override
 	public void draw(Graphics g) {
-		
 		Graphics2D g2d = (Graphics2D) g;
 		
 		bm.draw(g);
@@ -277,7 +288,7 @@ public class SimState extends State{
 	public void mouseClicked(MouseEvent arg0) {
 		
 		String buttonClicked = bm.buttonClicked(arg0);
-		
+
 		if(buttonClicked.equals("Reset")) {
 			
 			//System.out.println("hey");
@@ -297,11 +308,22 @@ public class SimState extends State{
 				handWashingGraph.add((double) 0);
 				socialDistancingGraph.add((double) 0);
 			}
+			
 
 			day = 0;
 			month = 1;
 			year = 0;
-
+			bm.sliderButtons.get(0).setVal(25);	//base r0
+			bm.sliderButtons.get(1).setVal(0);	//mortality rate
+			bm.sliderButtons.get(2).setVal(3);	//in days
+			bm.sliderButtons.get(3).setVal(10);	//in days
+			bm.sliderButtons.get(4).setVal(365);//in days
+			
+			bm.sliderButtons.get(5).setVal(31);//31% max summer reduction to r0
+			bm.sliderButtons.get(6).setVal(0);//handwashing
+			bm.sliderButtons.get(7).setVal(0);//social distancing
+			bm.sliderButtons.get(8).setVal(5); //speed
+			bm.toggleButtons.get(0).setToggled(false); //toggle
 
 			sim.reset();
 		}
@@ -343,7 +365,6 @@ public class SimState extends State{
 	public void mouseReleased(MouseEvent arg0) {
 		
 		bm.mouseReleased();
-		
 	}
 
 }

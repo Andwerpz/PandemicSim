@@ -9,7 +9,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-public class Button extends Rectangle{
+public class Button{
 	
 	private int x, y, width, height;
 	private String text;
@@ -30,7 +30,7 @@ public class Button extends Rectangle{
 		this.font = new Font("Dialogue", Font.PLAIN, 12);	//default font for java swing
 		this.color = Color.black;
 		
-		setBounds(x, y, width, height);
+		// setBounds(x, y, width, height);
 		
 		this.textWidth = calculateTextWidth();
 		
@@ -80,9 +80,37 @@ public class Button extends Rectangle{
 	public double getX() {
 		return this.x;
 	}
+
+	public int getWidth(){
+		return width;
+	}
+
+	public int getHeight(){
+		return height;
+	}
+
+	public int getTextWidth(){
+		return textWidth;
+	}
+
+	public int getTextHeight(){
+		return textHeight;
+	}
 	
 	public String getText() {
 		return text;
+	}
+
+	public Color getColor(){
+		return color;
+	}
+
+	public Font getFont(){
+		return font;
+	}
+
+	public boolean getPressed(){
+		return pressed;
 	}
 	
 	public void pressed(MouseEvent m) {
@@ -115,8 +143,8 @@ public class Button extends Rectangle{
 //	}
 	
 	public boolean isClicked(MouseEvent arg0) {
-		
-		if(this.contains(new Point(arg0.getX(), arg0.getY()))) {
+		Rectangle temp = new Rectangle(x,y,width,height);
+		if(temp.contains(new Point(arg0.getX(), arg0.getY()))) {
 			return true;
 		}
 		
