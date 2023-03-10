@@ -12,99 +12,100 @@ import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-
 import state.StateManager;
 
-public class MainPanel extends JPanel implements Runnable, KeyListener, MouseListener{
-	
+public class MainPanel extends JPanel implements Runnable, KeyListener, MouseListener {
+
 	public final static int WIDTH = 1280;
 	public final static int HEIGHT = 720;
-	
+
 	private boolean isRunning = true;
 	private Thread thread;
-	
+
 	private int FPS = 60;
 	private long targetTime = 1000 / FPS;
-	
+
 	public Point mouse = new Point(0, 0);
-	
+
 	private StateManager gsm;
 	//private Images images;
 
 	public MainPanel() {
-		
+
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		
+
 		setFocusable(true);
 		setVisible(true);
 		addKeyListener(this);
 		addMouseListener(this);
-		
+
 		//this.images = new Images();
-		
+
 		this.start();
-		
+
 	}
-	
+
 	private void start() {
 		thread = new Thread(this);
 		thread.start();
 	}
-	
+
 	@Override
 	public void run() {
-		
+
 		long start, elapsed, wait;
-		
+
 		gsm = new StateManager();
-		
-		while(isRunning) {
-			
+
+		while (isRunning) {
+
 			start = System.nanoTime();
-			
+
 			tick();
 			repaint();
-			
+
 			elapsed = System.nanoTime() - start;
 			wait = targetTime - elapsed / 1000000;
-			
-			if(wait < 0) {
+
+			if (wait < 0) {
 				wait = 5;
 			}
-			
+
 			try {
 				thread.sleep(wait);
-			} catch(Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	public void tick() {
-		
+
 		Point mouse2 = MouseInfo.getPointerInfo().getLocation();
-		
+
 		mouse.setLocation(mouse2);
 		SwingUtilities.convertPointToScreen(mouse2, this);
-		
+
 		mouse.setLocation(mouse.x - (mouse2.x - mouse.x), mouse.y - (mouse2.y - mouse.y));
-		
+
 		gsm.tick(mouse);
-		
+
 	}
-	
+
+	@Override
 	public void paintComponent(Graphics g) {
-		
+
 		super.paintComponent(g);
-		
+
 		g.clearRect(0, 0, WIDTH, HEIGHT);
-		
+
 		gsm.draw(g);
-		
+
 	}
-	
+
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		gsm.mouseClicked(arg0);
@@ -145,6 +146,4 @@ public class MainPanel extends JPanel implements Runnable, KeyListener, MouseLis
 		gsm.keyTyped(arg0.getKeyCode());
 	}
 
-	
-	
 }
